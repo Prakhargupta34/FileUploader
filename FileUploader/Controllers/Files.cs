@@ -9,6 +9,7 @@ using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FileUploader.Controllers
 {
@@ -22,6 +23,7 @@ namespace FileUploader.Controllers
             this._configuration = _configuration;
         }
         [HttpPost("upload")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Upload(IFormFile file)
         {
             await using var memoryStr = new MemoryStream();
@@ -71,6 +73,7 @@ namespace FileUploader.Controllers
         }
         
         [HttpGet("getfile")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetFile([FromQuery]string fileName)
         {
             var credentials = new BasicAWSCredentials(_configuration["AWS_ACCESS_KEY_ID"].Trim(), _configuration["AWS_SECRET_ACCESS_KEY"].Trim());
