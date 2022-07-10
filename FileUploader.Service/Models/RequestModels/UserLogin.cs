@@ -1,4 +1,4 @@
-﻿namespace FileUploader.Models
+﻿namespace FileUploader.Service.Models.RequestModels
 {
     public class UserLogin
     {

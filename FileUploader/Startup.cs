@@ -1,17 +1,33 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using FileUploader.AWSCloud;
+using FileUploader.AzureCloud;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using FileUploader.Service;
+using FileUploader.Service.Data;
+using FileUploader.Service.Interfaces;
+using FileUploader.Service.Services;
+using FileUploader.Shared;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.VisualBasic;
+using Newtonsoft.Json;
 
 namespace FileUploader
 {
@@ -56,28 +72,44 @@ namespace FileUploader
                     Type = SecuritySchemeType.ApiKey
                 });
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement {
-   {
-     new OpenApiSecurityScheme
-     {
-       Reference = new OpenApiReference
-       {
-         Type = ReferenceType.SecurityScheme,
-         Id = "Bearer"
-       }
-      },
-      new string[] { }
-    }
-  });
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] { }
+                    }
+                });
             });
             services.AddControllers().AddJsonOptions(options => {
                 options.JsonSerializerOptions.IgnoreNullValues = true;
             });
+            services.AddDbContext<FileUploaderDbContext>(options =>
+            {
+                options.UseSqlServer(Configuration["SqlServerConnectionString"]);
+            });
+            
+            
+            services.AddScoped<IClientService, ClientService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ILoginService, LoginService>();
+            services.AddScoped<IFileService, FileService>();
+
+            services.AddSingleton<IAwsCloud, AwsCloud>();
+            services.AddSingleton<IAzureCloud, AzureCloud.AzureCloud>();
+            services.AddSingleton<ISecretManager, AzureSecretManger>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, FileUploaderDbContext context)
         {
-            app.UseAuthentication();
+            context.Database.Migrate();
+            
             app.UseSwagger();
             app.UseSwaggerUI();
             
@@ -89,11 +121,36 @@ namespace FileUploader
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-
+            
+            app.UseExceptionHandler(options => {
+                    options.Run(
+                        async context => { await HandleGlobalException(context); });
+                }
+            );
+            
             app.UseEndpoints(endpoints => {
                 endpoints.MapControllers();
                 endpoints.MapControllers(); 
             });
+        }
+        private static async Task HandleGlobalException(HttpContext context) {
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+            var exceptionObject = context.Features.Get<IExceptionHandlerFeature>();
+            if (exceptionObject != null) {
+                object response;
+                if (int.TryParse(exceptionObject.Error.Data[Shared.Constants.General.StatusCode]?.ToString(), out var statusCode)) {
+                    context.Response.StatusCode = statusCode;
+                    response = new Dictionary<string, string> {
+                        {"message", $"{exceptionObject.Error.Message}"},
+                    };
+                } else {
+                    response = new Dictionary<string, string> {
+                        {"message", $"{exceptionObject.Error.Message}"},
+                    };
+                }
+                await context.Response.WriteAsync(JsonConvert.SerializeObject(response)).ConfigureAwait(false);
+            }
         }
     }
 }

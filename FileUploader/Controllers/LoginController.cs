@@ -1,12 +1,12 @@
-﻿using FileUploader.Models;
-using FileUploader.Service;
-using FileUploader.Service.Impl;
+﻿using FileUploader.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using FileUploader.Database.Impl;
-using FileUploader.exception;
 using System;
+using FileUploader.Service.Exceptions;
+using FileUploader.Service.Interfaces;
+using FileUploader.Service.Models.RequestModels;
+using FileUploader.Service.Services;
 
 namespace FileUploader.Controllers
 {
@@ -17,27 +17,18 @@ namespace FileUploader.Controllers
         private IConfiguration _config;
         private ILoginService _loginService;
 
-        public LoginController(IConfiguration config)
+        public LoginController(IConfiguration config, ILoginService loginService)
         {
             _config = config;
-            _loginService = new LoginService(new FileUploader.Database.Impl.Database());
+            _loginService = loginService;
         }
 
         [AllowAnonymous]
         [HttpPost]
         public IActionResult Login([FromBody] UserLogin userLogin)
         {
-            try
-            {
-                string token = _loginService.LoginAndCreateToken(userLogin.UserName, userLogin.Password, _config);
-                return Ok(token);
-            } catch (UserNotFoundException e)
-            {
-                return NotFound(e.Message);
-            } catch (Exception e)
-            {
-                throw e;
-            }
+            string token = _loginService.LoginAndCreateToken(userLogin.UserName, userLogin.Password, _config);
+            return Ok(token);
         }
     }
 }

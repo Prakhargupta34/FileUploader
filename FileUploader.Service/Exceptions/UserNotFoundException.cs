@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace FileUploader.exception
+namespace FileUploader.Service.Exceptions
 {
     
-    public class UserNotFoundException : Exception
+    public class UserNotFoundException : BadRequestException
     {
         public UserNotFoundException(string message)
             : base(message)

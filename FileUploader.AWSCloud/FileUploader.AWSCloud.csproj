@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <RootNamespace>FileUploader.AWSCloud</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AWSSDK.Core" Version="3.7.11.11" />
+      <PackageReference Include="AWSSDK.S3" Version="3.7.9.11" />
+      <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="6.0.0-preview.4.21253.5" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0-preview.5.22301.12" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\FileUploader.Shared\FileUploader.Shared.csproj" />
+    </ItemGroup>
+
+</Project>

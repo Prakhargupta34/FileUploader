@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 
-namespace FileUploader.Service
+namespace FileUploader.Service.Interfaces
 {
     public interface ILoginService
     {

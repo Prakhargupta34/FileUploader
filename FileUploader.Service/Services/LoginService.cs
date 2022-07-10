@@ -1,28 +1,27 @@
-﻿using FileUploader.Database;
-using FileUploader.exception;
-using FileUploader.Models;
-using System.Text;
+﻿using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Mvc;
+using System.Text;
+using FileUploader.Service.Exceptions;
+using FileUploader.Service.Interfaces;
+using FileUploader.Service.Models;
+using FileUploader.Shared.Constants;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System;
 
-namespace FileUploader.Service.Impl
+namespace FileUploader.Service.Services
 {
     public class LoginService : ILoginService
     {
-        private IDatabase db;
-        public LoginService(IDatabase db)
+        private readonly IUserService _userService;
+        public LoginService(IUserService userService)
         {
-            this.db = db;
+            _userService = userService;
         }
 
         public string LoginAndCreateToken(string username, string password, IConfiguration config)
         {
-            User user = authenticate(username, password);
+            var user = Authenticate(username, password);
 
             return GenerateToken(user, config);
         }
@@ -36,7 +35,8 @@ namespace FileUploader.Service.Impl
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Username),
                 new Claim(ClaimTypes.Email, user.EmailAddress),
-                new Claim(ClaimTypes.Role, user.Role)
+                new Claim(ClaimTypes.Role, user.Role),
+                new Claim(ClaimType.ClientId, user.ClientId.ToString())
             };
 
             var token = new JwtSecurityToken(config["Jwt:Issuer"],
@@ -48,12 +48,12 @@ namespace FileUploader.Service.Impl
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        private User authenticate(string username, string password)
+        private User Authenticate(string username, string password)
         {
-            User user = db.getUser(username, password);
+            User user = _userService.GetUser(username, password);
             if (user == null)
             {
-                throw new UserNotFoundException("Either username or password does n't match");
+                throw new UserNotFoundException("Either username or password doesn't match");
             }
             return user;
         }
