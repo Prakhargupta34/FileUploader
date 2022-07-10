@@ -12,7 +12,6 @@ public class AzureCloudProvider
         return new Shared.Models.AzureCloudProvider
         {
             Id = Guid.NewGuid(),
-            StorageAccountConnectionString = StorageAccountConnectionString,
             StorageContainerName = StorageContainerName
         };
     }

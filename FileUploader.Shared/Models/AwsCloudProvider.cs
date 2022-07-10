@@ -7,6 +7,4 @@ public class AwsCloudProvider
     public Guid ClientId { get; set; }
     public string BucketName { get; set; }
     public string Region { get; set; }
-    public string SecretAccessKey { get; set; }
-    public string AccessKeyId { get; set; }
 }

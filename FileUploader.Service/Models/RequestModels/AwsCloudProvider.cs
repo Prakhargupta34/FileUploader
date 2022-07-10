@@ -15,9 +15,7 @@ public class AwsCloudProvider
         {
             Id = Guid.NewGuid(),
             BucketName = BucketName,
-            Region = Region,
-            SecretAccessKey = SecretAccessKey,
-            AccessKeyId = AccessKeyId,
+            Region = Region
         };
     }
 }
