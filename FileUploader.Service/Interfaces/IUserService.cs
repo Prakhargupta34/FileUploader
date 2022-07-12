@@ -9,4 +9,6 @@ public interface IUserService
 {
     Task CreateUser(Models.User user);
     Models.User GetUser(string username, string password);
+
+    bool IsUserExists(string username);
 }

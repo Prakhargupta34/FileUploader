@@ -2,10 +2,10 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using FileUploader.Service.Exceptions;
 using FileUploader.Service.Interfaces;
 using FileUploader.Service.Models;
 using FileUploader.Shared.Constants;
+using FileUploader.Shared.Exceptions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -53,7 +53,7 @@ namespace FileUploader.Service.Services
             User user = _userService.GetUser(username, password);
             if (user == null)
             {
-                throw new UserNotFoundException("Either username or password doesn't match");
+                throw new UserNotFoundException("Either username or password is incorrect");
             }
             return user;
         }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace FileUploader.Service.Exceptions
+﻿namespace FileUploader.Shared.Exceptions
 {
     
     public class UserNotFoundException : BadRequestException

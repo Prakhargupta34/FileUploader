@@ -8,6 +8,7 @@ using FileUploader.Service.Models.RequestModels;
 using FileUploader.Service.Models.ResponseModels;
 using FileUploader.Shared;
 using FileUploader.Shared.Constants;
+using FileUploader.Shared.Exceptions;
 using User = FileUploader.Service.Models.RequestModels.User;
 
 namespace FileUploader.Service.Services;
@@ -16,36 +17,36 @@ public class ClientService: IClientService
 {
     private readonly FileUploaderDbContext _context;
     private readonly ISecretManager _secretManager;
+    private readonly IUserService _userService;
 
-    public ClientService(FileUploaderDbContext context, ISecretManager secretManager)
+    public ClientService(FileUploaderDbContext context, ISecretManager secretManager, IUserService userService)
     {
         _context = context;
         _secretManager = secretManager;
+        _userService = userService;
     }
     public async Task<ClientResponse> CreateClient(ClientRequest clientRequest)
     {
-        clientRequest.CloudProviderType = clientRequest.CloudProviderType.Trim().ToLower();
+        if (_userService.IsUserExists(clientRequest.AdminUser.Username))
+            throw new BadRequestException("Admin username provided is already taken");
         
+        clientRequest.CloudProviderType = clientRequest.CloudProviderType.Trim().ToLower();
         var cloudProviderType = clientRequest.CloudProviderType;
         
         var clientId = Guid.NewGuid();
         Guid cloudProviderId =  CreateCloudProvider(clientRequest, clientId);
-
-        var adminUser = clientRequest.AdminUser.ToModel();
-        adminUser.Role = Shared.Constants.Roles.Administrator;
-        
         var client = new Client()
         {
             Id = clientId,
             Name = clientRequest.Name,
             CloudProviderId = cloudProviderId,
             CloudProviderType = cloudProviderType,
-            Users = new List<Models.User>{adminUser}
         };
         
         _context.Add(client);
-        
         await _context.SaveChangesAsync();
+        
+        CreateAdminUser(clientRequest.AdminUser, clientId);
         
         return new ClientResponse()
         {
@@ -85,5 +86,12 @@ public class ClientService: IClientService
         }
 
         return cloudProviderId;
+    }
+
+    private void CreateAdminUser(User user, Guid clientId)
+    {
+        var adminUser = user.ToModel(clientId.ToString());
+        adminUser.Role = Roles.Administrator;
+        _userService.CreateUser(adminUser);
     }
 }

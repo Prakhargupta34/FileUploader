@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
-using FileUploader.Service.Exceptions;
 using FileUploader.Service.Interfaces;
 using FileUploader.Service.Models.RequestModels;
 using FileUploader.Service.Services;

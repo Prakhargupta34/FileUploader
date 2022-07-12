@@ -1,7 +1,6 @@
-using System;
 using System.Net;
 
-namespace FileUploader.Service.Exceptions;
+namespace FileUploader.Shared.Exceptions;
 
 public class BadRequestException : Exception
 {
