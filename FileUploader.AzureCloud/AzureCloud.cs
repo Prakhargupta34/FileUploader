@@ -13,12 +13,10 @@ namespace FileUploader.AzureCloud;
 
 public class AzureCloud : IAzureCloud
 {
-    private readonly IConfiguration _configuration;
     private readonly ISecretManager _secretManager;
 
-    public AzureCloud(IConfiguration _configuration, ISecretManager secretManager)
+    public AzureCloud(ISecretManager secretManager)
     {
-        this._configuration = _configuration;
         _secretManager = secretManager;
     }
 

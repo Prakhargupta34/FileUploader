@@ -7,6 +7,7 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using FileUploader.Shared;
+using FileUploader.Shared.Exceptions;
 using FileUploader.Shared.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -15,12 +16,10 @@ namespace FileUploader.AWSCloud
 {
     public class AwsCloud : IAwsCloud
     {
-        private readonly IConfiguration _configuration;
         private readonly ISecretManager _secretManager;
 
-        public AwsCloud(IConfiguration configuration, ISecretManager secretManager)
+        public AwsCloud(ISecretManager secretManager)
         {
-            _configuration = configuration;
             _secretManager = secretManager;
         }
         
@@ -121,6 +120,10 @@ namespace FileUploader.AWSCloud
             {
                 // Created an S3 client
                 using var client = new AmazonS3Client(credentials, config);
+                
+                if (!IsFileExists(fileName, awsCloudProvider.BucketName, client)) 
+                    throw new BadRequestException("File not found");
+
                 GetPreSignedUrlRequest request = new GetPreSignedUrlRequest
                 {
                     BucketName = awsCloudProvider.BucketName,
@@ -131,10 +134,25 @@ namespace FileUploader.AWSCloud
                 // Get path for request
                 return client.GetPreSignedURL(request);
             }
+            catch (BadRequestException)
+            {
+                throw;
+            }
             catch (Exception)
             {
-                throw new Exception("File not found");
+                throw new Exception("Unable to create shareable url");
             }
+        }
+
+        private bool IsFileExists(string fileName, string bucketName, AmazonS3Client s3Client)
+        {
+            var listResponse = s3Client.ListObjectsV2Async(new ListObjectsV2Request()
+            {
+                BucketName = bucketName,
+                Prefix = fileName
+            }).GetAwaiter().GetResult();
+
+            return listResponse.KeyCount > 0;
         }
     }
 }
