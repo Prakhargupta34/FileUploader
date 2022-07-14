@@ -29,17 +29,6 @@ namespace FileUploader.AWSCloud
             await file.CopyToAsync(memoryStr);
             
             var objName = $"{file.FileName}";
-
-            var accessKeyId = _secretManager.GetSecret($"{awsCloudProvider.ClientId}-{Shared.Constants.SecretKeys.AwsAccessKeyId}").GetAwaiter().GetResult();
-            var secretKey = _secretManager.GetSecret($"{awsCloudProvider.ClientId}-{Shared.Constants.SecretKeys.AwsSecretAccessKey}").GetAwaiter().GetResult();
-            
-            var credentials = new BasicAWSCredentials(accessKeyId, secretKey);
-
-            // Specify the region
-            var config = new AmazonS3Config()
-            {
-                RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(awsCloudProvider.Region)
-            };
             
             try
             {
@@ -53,7 +42,7 @@ namespace FileUploader.AWSCloud
                 };
 
                 // Created an S3 client
-                using var client = new AmazonS3Client(credentials, config);
+                using var client = GetAmazonS3Client(awsCloudProvider);
 
                 // upload utility to s3
                 var transferUtiltiy = new TransferUtility(client);
@@ -70,20 +59,10 @@ namespace FileUploader.AWSCloud
 
         public async Task<FileResponse> DownloadFile(string fileName, AwsCloudProvider awsCloudProvider)
         {
-            var accessKeyId = _secretManager.GetSecret($"{awsCloudProvider.ClientId}-{Shared.Constants.SecretKeys.AwsAccessKeyId}").GetAwaiter().GetResult();
-            var secretKey = _secretManager.GetSecret($"{awsCloudProvider.ClientId}-{Shared.Constants.SecretKeys.AwsSecretAccessKey}").GetAwaiter().GetResult();
-            
-            var credentials = new BasicAWSCredentials(accessKeyId, secretKey);
-            
-            // Specify the region
-            var config = new AmazonS3Config()
-            {
-                RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(awsCloudProvider.Region)
-            };
             try
             {
                 // Created an S3 client
-                using var client = new AmazonS3Client(credentials, config);
+                using var client = GetAmazonS3Client(awsCloudProvider);
 
                 var res = await client.GetObjectAsync(new GetObjectRequest()
                 {
@@ -106,20 +85,10 @@ namespace FileUploader.AWSCloud
 
         public async Task<string> GetShareableUrl(string fileName, AwsCloudProvider awsCloudProvider, int expireInMinutes=15)
         {
-            var accessKeyId = _secretManager.GetSecret($"{awsCloudProvider.ClientId}-{Shared.Constants.SecretKeys.AwsAccessKeyId}").GetAwaiter().GetResult();
-            var secretKey = _secretManager.GetSecret($"{awsCloudProvider.ClientId}-{Shared.Constants.SecretKeys.AwsSecretAccessKey}").GetAwaiter().GetResult();
-            
-            var credentials = new BasicAWSCredentials(accessKeyId, secretKey);
-            
-            // Specify the region
-            var config = new AmazonS3Config()
-            {
-                RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(awsCloudProvider.Region)
-            };
             try
             {
                 // Created an S3 client
-                using var client = new AmazonS3Client(credentials, config);
+                using var client = GetAmazonS3Client(awsCloudProvider);
                 
                 if (!IsFileExists(fileName, awsCloudProvider.BucketName, client)) 
                     throw new BadRequestException("File not found");
@@ -153,6 +122,22 @@ namespace FileUploader.AWSCloud
             }).GetAwaiter().GetResult();
 
             return listResponse.KeyCount > 0;
+        }
+
+        private AmazonS3Client GetAmazonS3Client(AwsCloudProvider awsCloudProvider)
+        {
+            var accessKeyId = _secretManager.GetSecret($"{awsCloudProvider.ClientId}-{Shared.Constants.SecretKeys.AwsAccessKeyId}").GetAwaiter().GetResult();
+            var secretKey = _secretManager.GetSecret($"{awsCloudProvider.ClientId}-{Shared.Constants.SecretKeys.AwsSecretAccessKey}").GetAwaiter().GetResult();
+            
+            var credentials = new BasicAWSCredentials(accessKeyId, secretKey);
+
+            // Specify the region
+            var config = new AmazonS3Config()
+            {
+                RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(awsCloudProvider.Region)
+            };
+            
+            return new AmazonS3Client(credentials, config);
         }
     }
 }

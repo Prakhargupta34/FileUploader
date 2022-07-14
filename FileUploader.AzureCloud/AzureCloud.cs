@@ -7,7 +7,6 @@ using Azure.Storage.Sas;
 using FileUploader.Shared;
 using FileUploader.Shared.Models;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 
 namespace FileUploader.AzureCloud;
 
@@ -24,10 +23,7 @@ public class AzureCloud : IAzureCloud
     {
         try
         {
-            var connectionString =
-                _secretManager.GetSecret($"{azureCloudProvider.ClientId}-{Shared.Constants.SecretKeys.AzureStorageAccountConnectionString}").GetAwaiter().GetResult();
-            BlobContainerClient container = new BlobContainerClient(connectionString, azureCloudProvider.StorageContainerName);
-            BlobClient blob = container.GetBlobClient(file.FileName);
+            var blob = GetBlobClient(azureCloudProvider, file.FileName);
             
             using (Stream stream = file.OpenReadStream())
             {
@@ -44,11 +40,8 @@ public class AzureCloud : IAzureCloud
     {
         try
         {
-            var connectionString =
-                _secretManager.GetSecret($"{azureCloudProvider.ClientId}-{Shared.Constants.SecretKeys.AzureStorageAccountConnectionString}").GetAwaiter().GetResult();
-            BlobContainerClient container = new BlobContainerClient(connectionString, azureCloudProvider.StorageContainerName);
+            var blob = GetBlobClient(azureCloudProvider, fileName);
 
-            BlobClient blob = container.GetBlobClient(fileName);
             if (await blob.ExistsAsync())
             {
                 var res = await blob.DownloadAsync();
@@ -71,11 +64,7 @@ public class AzureCloud : IAzureCloud
     {
         try
         {
-            var connectionString =
-                _secretManager.GetSecret($"{azureCloudProvider.ClientId}-{Shared.Constants.SecretKeys.AzureStorageAccountConnectionString}").GetAwaiter().GetResult();
-            BlobContainerClient container = new BlobContainerClient(connectionString, azureCloudProvider.StorageContainerName);
-
-            BlobClient blobClient = container.GetBlobClient(fileName);
+            var blobClient = GetBlobClient(azureCloudProvider, fileName);
             
             BlobSasBuilder sasBuilder = new BlobSasBuilder()
             {
@@ -93,5 +82,15 @@ public class AzureCloud : IAzureCloud
         {
             throw new Exception("File not found");
         }
+    }
+
+    private BlobClient GetBlobClient(AzureCloudProvider azureCloudProvider, string fileName)
+    {
+        var connectionString =
+            _secretManager.GetSecret($"{azureCloudProvider.ClientId}-{Shared.Constants.SecretKeys.AzureStorageAccountConnectionString}").GetAwaiter().GetResult();
+        BlobContainerClient container = new BlobContainerClient(connectionString, azureCloudProvider.StorageContainerName);
+
+        BlobClient blobClient = container.GetBlobClient(fileName);
+        return blobClient;
     }
 }
