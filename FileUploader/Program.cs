@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Azure.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -21,8 +19,19 @@ namespace FileUploader
                 {
                     config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
                     config.AddEnvironmentVariables();
-                    var build = config.Build();
+                    var root = config.Build();
+                    AddAzureKeyvaultConfigurationSource(root, config);
                 })
                 .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+        
+        private static void AddAzureKeyvaultConfigurationSource(IConfigurationRoot root, IConfigurationBuilder config){
+            var tenantId = root[Shared.Constants.SecretKeys.Azure.TenantId];
+            var clientId = root[Shared.Constants.SecretKeys.Azure.ClientId];
+            var secret = root[Shared.Constants.SecretKeys.Azure.Secret];
+            var url = root[Shared.Constants.SecretKeys.Azure.KeyVaultUrl];
+                    
+            var credential = new ClientSecretCredential(tenantId, clientId, secret);
+            config.AddAzureKeyVault(new Uri(url), credential);
+        }
     }
 }

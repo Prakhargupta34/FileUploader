@@ -14,14 +14,7 @@ public class AzureSecretManger : ISecretManager
     }
     public async Task<string> GetSecret(string key)
     {
-        string kvUri = _configuration[Constants.SecretKeys.Azure.KeyVaultUrl];
-        
-        var credentials = new ClientSecretCredential(_configuration[Constants.SecretKeys.Azure.TenantId],
-            _configuration[Constants.SecretKeys.Azure.ClientId], _configuration[Constants.SecretKeys.Azure.Secret]);
-        
-        var client = new SecretClient(new Uri(kvUri), credentials);
-
-        return client.GetSecretAsync(key).GetAwaiter().GetResult().Value.Value;
+        return _configuration[key];
     }
 
     public async Task StoreSecret(string key, string value)
@@ -34,5 +27,8 @@ public class AzureSecretManger : ISecretManager
         var client = new SecretClient(new Uri(kvUri), credentials);
 
         client.SetSecretAsync(key, value).GetAwaiter().GetResult();
+        
+        //To fetch latest secrets from AzureKeyVault Configuration source
+        (_configuration as IConfigurationRoot).Reload();
     }
 }
