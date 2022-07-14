@@ -4,9 +4,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileUploader", "FileUploade
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileUploader.Service", "FileUploader.Service\FileUploader.Service.csproj", "{80DF3236-38BE-477A-90D3-F33AF31D750C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileUploader.AWSCloud", "FileUploader.AWSCloud\FileUploader.AWSCloud.csproj", "{D6E75257-F08F-4C64-8359-19A23036F7B0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileUploader.AwsCloudProvider", "FileUploader.AwsCloudProvider\FileUploader.AwsCloudProvider.csproj", "{D6E75257-F08F-4C64-8359-19A23036F7B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileUploader.AzureCloud", "FileUploader.AzureCloud\FileUploader.AzureCloud.csproj", "{B929F19C-CC47-4040-859B-0595B8294952}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileUploader.AzureCloudProvider", "FileUploader.AzureCloudProvider\FileUploader.AzureCloudProvider.csproj", "{B929F19C-CC47-4040-859B-0595B8294952}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileUploader.Shared", "FileUploader.Shared\FileUploader.Shared.csproj", "{5A3C3F95-0E71-4162-8D30-8CA58638B781}"
 EndProject

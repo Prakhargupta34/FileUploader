@@ -6,8 +6,8 @@ public class ClientRequest
     
     public string CloudProviderType { get; set; }
 
-    public AwsCloudProvider AwsCloudProvider { get; set; }
-    public AzureCloudProvider AzureCloudProvider { get; set; }
+    public AwsCloudProviderDetails AwsCloudProviderDetails { get; set; }
+    public AzureCloudProviderDetails AzureCloudProviderDetails { get; set; }
     
     public User AdminUser { get; set; }
 }

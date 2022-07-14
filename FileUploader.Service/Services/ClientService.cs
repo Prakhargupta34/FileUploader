@@ -60,25 +60,25 @@ public class ClientService: IClientService
         Guid cloudProviderId;
         if (cloudProviderType == CloudProviderType.AWS)
         {
-            var awsCloudProvider = clientRequest.AwsCloudProvider.ToModel();
+            var awsCloudProvider = clientRequest.AwsCloudProviderDetails.ToModel();
             awsCloudProvider.ClientId = clientId;
                 _context.Add(awsCloudProvider);
             cloudProviderId = awsCloudProvider.Id;
             
             _secretManager.StoreSecret($"{clientId}-{Shared.Constants.SecretKeys.AwsAccessKeyId}",
-                clientRequest.AwsCloudProvider.AccessKeyId).GetAwaiter().GetResult();
+                clientRequest.AwsCloudProviderDetails.AccessKeyId).GetAwaiter().GetResult();
             _secretManager.StoreSecret($"{clientId}-{Shared.Constants.SecretKeys.AwsSecretAccessKey}",
-                clientRequest.AwsCloudProvider.SecretAccessKey).GetAwaiter().GetResult();
+                clientRequest.AwsCloudProviderDetails.SecretAccessKey).GetAwaiter().GetResult();
         }
         else if (cloudProviderType == CloudProviderType.Azure)
         {
-            var azureCloudProvider = clientRequest.AzureCloudProvider.ToModel();
+            var azureCloudProvider = clientRequest.AzureCloudProviderDetails.ToModel();
             azureCloudProvider.ClientId = clientId;
             _context.Add(azureCloudProvider);
             cloudProviderId = azureCloudProvider.Id;
             
             _secretManager.StoreSecret($"{clientId}-{Shared.Constants.SecretKeys.AzureStorageAccountConnectionString}",
-                clientRequest.AzureCloudProvider.StorageAccountConnectionString).GetAwaiter().GetResult();
+                clientRequest.AzureCloudProviderDetails.StorageAccountConnectionString).GetAwaiter().GetResult();
         }
         else
         {

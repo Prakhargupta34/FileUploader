@@ -8,22 +8,23 @@ using FileUploader.Shared;
 using FileUploader.Shared.Models;
 using Microsoft.AspNetCore.Http;
 
-namespace FileUploader.AzureCloud;
+namespace FileUploader.AzureCloudProvider;
 
-public class AzureCloud : IAzureCloud
+public class AzureCloudProvider : ICloudProvider
 {
     private readonly ISecretManager _secretManager;
 
-    public AzureCloud(ISecretManager secretManager)
+    public AzureCloudProvider(ISecretManager secretManager)
     {
         _secretManager = secretManager;
     }
 
-    public async Task UploadFile(IFormFile file, AzureCloudProvider azureCloudProvider)
+    public async Task UploadFile(IFormFile file, object azureCloudDetails)
     {
+        var azureCloudProviderDetails = azureCloudDetails as AzureCloudProviderDetails;
         try
         {
-            var blob = GetBlobClient(azureCloudProvider, file.FileName);
+            var blob = GetBlobClient(azureCloudProviderDetails, file.FileName);
             
             using (Stream stream = file.OpenReadStream())
             {
@@ -36,11 +37,12 @@ public class AzureCloud : IAzureCloud
         }
     }
 
-    public async Task<FileResponse> DownloadFile(string fileName, AzureCloudProvider azureCloudProvider)
+    public async Task<FileResponse> DownloadFile(string fileName, object azureCloudDetails)
     {
+        var azureCloudProviderDetails = azureCloudDetails as AzureCloudProviderDetails;
         try
         {
-            var blob = GetBlobClient(azureCloudProvider, fileName);
+            var blob = GetBlobClient(azureCloudProviderDetails, fileName);
 
             if (await blob.ExistsAsync())
             {
@@ -60,12 +62,14 @@ public class AzureCloud : IAzureCloud
         }
     }
 
-    public async Task<string> GetShareableUrl(string fileName, AzureCloudProvider azureCloudProvider, int expiryInMins)
-    {
+    public async Task<string> GetShareableUrl(string fileName, object azureCloudDetails, int expiryInMins)
+    {        
+        var azureCloudProviderDetails = azureCloudDetails as AzureCloudProviderDetails;
         try
         {
-            var blobClient = GetBlobClient(azureCloudProvider, fileName);
-            
+            var blobClient = GetBlobClient(azureCloudProviderDetails, fileName);
+            if (!await blobClient.ExistsAsync())
+                throw new Exception();
             BlobSasBuilder sasBuilder = new BlobSasBuilder()
             {
                 BlobContainerName = blobClient.GetParentBlobContainerClient().Name,
@@ -84,11 +88,11 @@ public class AzureCloud : IAzureCloud
         }
     }
 
-    private BlobClient GetBlobClient(AzureCloudProvider azureCloudProvider, string fileName)
+    private BlobClient GetBlobClient(AzureCloudProviderDetails azureCloudProviderDetails, string fileName)
     {
         var connectionString =
-            _secretManager.GetSecret($"{azureCloudProvider.ClientId}-{Shared.Constants.SecretKeys.AzureStorageAccountConnectionString}").GetAwaiter().GetResult();
-        BlobContainerClient container = new BlobContainerClient(connectionString, azureCloudProvider.StorageContainerName);
+            _secretManager.GetSecret($"{azureCloudProviderDetails.ClientId}-{Shared.Constants.SecretKeys.AzureStorageAccountConnectionString}").GetAwaiter().GetResult();
+        BlobContainerClient container = new BlobContainerClient(connectionString, azureCloudProviderDetails.StorageContainerName);
 
         BlobClient blobClient = container.GetBlobClient(fileName);
         return blobClient;

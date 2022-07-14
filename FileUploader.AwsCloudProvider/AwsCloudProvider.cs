@@ -10,21 +10,21 @@ using FileUploader.Shared;
 using FileUploader.Shared.Exceptions;
 using FileUploader.Shared.Models;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 
-namespace FileUploader.AWSCloud
+namespace FileUploader.AwsCloudProvider
 {
-    public class AwsCloud : IAwsCloud
+    public class AwsCloudProvider : ICloudProvider
     {
         private readonly ISecretManager _secretManager;
 
-        public AwsCloud(ISecretManager secretManager)
+        public AwsCloudProvider(ISecretManager secretManager)
         {
             _secretManager = secretManager;
         }
         
-        public async Task UploadFile(IFormFile file, AwsCloudProvider awsCloudProvider)
+        public async Task UploadFile(IFormFile file, object awsProviderDetails)
         {
+            var awsCloudProviderDetails = (awsProviderDetails as AwsCloudProviderDetails);
             await using var memoryStr = new MemoryStream();
             await file.CopyToAsync(memoryStr);
             
@@ -37,12 +37,12 @@ namespace FileUploader.AWSCloud
                 {
                     InputStream = memoryStr,
                     Key = objName,
-                    BucketName = awsCloudProvider.BucketName,
+                    BucketName = awsCloudProviderDetails.BucketName,
                     CannedACL = S3CannedACL.NoACL
                 };
 
                 // Created an S3 client
-                using var client = GetAmazonS3Client(awsCloudProvider);
+                using var client = GetAmazonS3Client(awsCloudProviderDetails);
 
                 // upload utility to s3
                 var transferUtiltiy = new TransferUtility(client);
@@ -57,17 +57,18 @@ namespace FileUploader.AWSCloud
             }
         }
 
-        public async Task<FileResponse> DownloadFile(string fileName, AwsCloudProvider awsCloudProvider)
+        public async Task<FileResponse> DownloadFile(string fileName, object awsProviderDetails)
         {
+            var awsCloudProviderDetails = (awsProviderDetails as AwsCloudProviderDetails);
             try
             {
                 // Created an S3 client
-                using var client = GetAmazonS3Client(awsCloudProvider);
+                using var client = GetAmazonS3Client(awsCloudProviderDetails);
 
                 var res = await client.GetObjectAsync(new GetObjectRequest()
                 {
                     Key = fileName,
-                    BucketName = awsCloudProvider.BucketName
+                    BucketName = awsCloudProviderDetails.BucketName
                 });
 
                 return new FileResponse
@@ -83,19 +84,20 @@ namespace FileUploader.AWSCloud
             }
         }
 
-        public async Task<string> GetShareableUrl(string fileName, AwsCloudProvider awsCloudProvider, int expireInMinutes=15)
+        public async Task<string> GetShareableUrl(string fileName, object awsProviderDetails, int expireInMinutes=15)
         {
+            var awsCloudProviderDetails = (awsProviderDetails as AwsCloudProviderDetails);
             try
             {
                 // Created an S3 client
-                using var client = GetAmazonS3Client(awsCloudProvider);
+                using var client = GetAmazonS3Client(awsCloudProviderDetails);
                 
-                if (!IsFileExists(fileName, awsCloudProvider.BucketName, client)) 
+                if (!IsFileExists(fileName, awsCloudProviderDetails.BucketName, client)) 
                     throw new BadRequestException("File not found");
 
                 GetPreSignedUrlRequest request = new GetPreSignedUrlRequest
                 {
-                    BucketName = awsCloudProvider.BucketName,
+                    BucketName = awsCloudProviderDetails.BucketName,
                     Key = fileName,
                     Expires = DateTime.Now.AddMinutes(expireInMinutes)
                 };
@@ -124,17 +126,17 @@ namespace FileUploader.AWSCloud
             return listResponse.KeyCount > 0;
         }
 
-        private AmazonS3Client GetAmazonS3Client(AwsCloudProvider awsCloudProvider)
+        private AmazonS3Client GetAmazonS3Client(AwsCloudProviderDetails awsCloudProviderDetails)
         {
-            var accessKeyId = _secretManager.GetSecret($"{awsCloudProvider.ClientId}-{Shared.Constants.SecretKeys.AwsAccessKeyId}").GetAwaiter().GetResult();
-            var secretKey = _secretManager.GetSecret($"{awsCloudProvider.ClientId}-{Shared.Constants.SecretKeys.AwsSecretAccessKey}").GetAwaiter().GetResult();
+            var accessKeyId = _secretManager.GetSecret($"{awsCloudProviderDetails.ClientId}-{Shared.Constants.SecretKeys.AwsAccessKeyId}").GetAwaiter().GetResult();
+            var secretKey = _secretManager.GetSecret($"{awsCloudProviderDetails.ClientId}-{Shared.Constants.SecretKeys.AwsSecretAccessKey}").GetAwaiter().GetResult();
             
             var credentials = new BasicAWSCredentials(accessKeyId, secretKey);
 
             // Specify the region
             var config = new AmazonS3Config()
             {
-                RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(awsCloudProvider.Region)
+                RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(awsCloudProviderDetails.Region)
             };
             
             return new AmazonS3Client(credentials, config);

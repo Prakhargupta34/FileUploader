@@ -24,8 +24,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\FileUploader.AWSCloud\FileUploader.AWSCloud.csproj" />
-      <ProjectReference Include="..\FileUploader.AzureCloud\FileUploader.AzureCloud.csproj" />
+      <ProjectReference Include="..\FileUploader.AwsCloudProvider\FileUploader.AwsCloudProvider.csproj" />
+      <ProjectReference Include="..\FileUploader.AzureCloudProvider\FileUploader.AzureCloudProvider.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Models\CloudProvider.cs" />
     </ItemGroup>
 
 </Project>

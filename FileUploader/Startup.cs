@@ -1,12 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using FileUploader.AWSCloud;
-using FileUploader.AzureCloud;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -17,16 +12,12 @@ using FileUploader.Service.Data;
 using FileUploader.Service.Interfaces;
 using FileUploader.Service.Services;
 using FileUploader.Shared;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 
 namespace FileUploader
@@ -99,10 +90,10 @@ namespace FileUploader
             services.AddScoped<ILoginService, LoginService>();
             services.AddScoped<IFileService, FileService>();
 
-            services.AddSingleton<IAwsCloud, AwsCloud>();
-            services.AddSingleton<IAzureCloud, AzureCloud.AzureCloud>();
+            services.AddSingleton<AwsCloudProvider.AwsCloudProvider>();
+            services.AddSingleton<AzureCloudProvider.AzureCloudProvider>();
+            services.AddSingleton<ICloudProviderFactory, CloudProviderFactory>();
             services.AddSingleton<ISecretManager, AzureSecretManger>();
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

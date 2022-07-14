@@ -4,7 +4,6 @@ using FileUploader.Service.Models.RequestModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using AwsCloudProvider = FileUploader.Shared.Models.AwsCloudProvider;
 
 namespace FileUploader.Controllers;
 

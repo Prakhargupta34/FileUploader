@@ -2,7 +2,6 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-        <RootNamespace>FileUploader.AWSCloud</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

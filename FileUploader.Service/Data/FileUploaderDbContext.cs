@@ -8,9 +8,9 @@ public class FileUploaderDbContext : DbContext
 {
     public DbSet<Client> Clients { get; set; }
     
-    public DbSet<AwsCloudProvider> AwsCloudProviders { get; set; }
+    public DbSet<AwsCloudProviderDetails> AwsCloudProviders { get; set; }
     
-    public DbSet<AzureCloudProvider> AzureCloudProviders { get; set; }
+    public DbSet<AzureCloudProviderDetails> AzureCloudProviders { get; set; }
     
     public DbSet<User> Users { get; set; }
 
