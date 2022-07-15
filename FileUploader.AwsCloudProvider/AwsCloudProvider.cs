@@ -22,7 +22,7 @@ namespace FileUploader.AwsCloudProvider
             _secretManager = secretManager;
         }
         
-        public async Task UploadFile(IFormFile file, object awsProviderDetails)
+        public async Task UploadFile(IFormFile file, CloudProviderDetails awsProviderDetails)
         {
             var awsCloudProviderDetails = (awsProviderDetails as AwsCloudProviderDetails);
             await using var memoryStr = new MemoryStream();
@@ -57,7 +57,7 @@ namespace FileUploader.AwsCloudProvider
             }
         }
 
-        public async Task<FileResponse> DownloadFile(string fileName, object awsProviderDetails)
+        public async Task<FileResponse> DownloadFile(string fileName, CloudProviderDetails awsProviderDetails)
         {
             var awsCloudProviderDetails = (awsProviderDetails as AwsCloudProviderDetails);
             try
@@ -84,7 +84,7 @@ namespace FileUploader.AwsCloudProvider
             }
         }
 
-        public async Task<string> GetShareableUrl(string fileName, object awsProviderDetails, int expireInMinutes=15)
+        public async Task<string> GetShareableUrl(string fileName, CloudProviderDetails awsProviderDetails, int expireInMinutes=15)
         {
             var awsCloudProviderDetails = (awsProviderDetails as AwsCloudProviderDetails);
             try

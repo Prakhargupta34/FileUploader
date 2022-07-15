@@ -45,7 +45,7 @@ public class FileService : IFileService
         return cloudProvider.GetShareableUrl(fileName, cloudProviderDetails, expiryInMins).GetAwaiter().GetResult();
     }
 
-    private object GetCloudProviderDetails(Client client)
+    private CloudProviderDetails GetCloudProviderDetails(Client client)
     {
         if (client?.CloudProviderType == CloudProviderType.AWS)
         {

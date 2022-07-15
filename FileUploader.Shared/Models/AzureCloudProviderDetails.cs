@@ -1,6 +1,6 @@
 namespace FileUploader.Shared.Models;
 
-public class AzureCloudProviderDetails
+public class AzureCloudProviderDetails : CloudProviderDetails
 {
     public Guid Id { get; set; }
     

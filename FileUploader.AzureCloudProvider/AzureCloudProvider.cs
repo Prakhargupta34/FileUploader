@@ -19,7 +19,7 @@ public class AzureCloudProvider : ICloudProvider
         _secretManager = secretManager;
     }
 
-    public async Task UploadFile(IFormFile file, object azureCloudDetails)
+    public async Task UploadFile(IFormFile file, CloudProviderDetails azureCloudDetails)
     {
         var azureCloudProviderDetails = azureCloudDetails as AzureCloudProviderDetails;
         try
@@ -37,7 +37,7 @@ public class AzureCloudProvider : ICloudProvider
         }
     }
 
-    public async Task<FileResponse> DownloadFile(string fileName, object azureCloudDetails)
+    public async Task<FileResponse> DownloadFile(string fileName, CloudProviderDetails azureCloudDetails)
     {
         var azureCloudProviderDetails = azureCloudDetails as AzureCloudProviderDetails;
         try
@@ -62,7 +62,7 @@ public class AzureCloudProvider : ICloudProvider
         }
     }
 
-    public async Task<string> GetShareableUrl(string fileName, object azureCloudDetails, int expiryInMins)
+    public async Task<string> GetShareableUrl(string fileName, CloudProviderDetails azureCloudDetails, int expiryInMins)
     {        
         var azureCloudProviderDetails = azureCloudDetails as AzureCloudProviderDetails;
         try
