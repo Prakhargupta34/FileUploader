@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
+using FileUploader.Attributes;
 using FileUploader.Service.Interfaces;
 using FileUploader.Service.Models.RequestModels;
 using FileUploader.Service.Services;
@@ -11,6 +12,7 @@ namespace FileUploader.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [ValidateModel]
     public class LoginController : ControllerBase
     {
         private IConfiguration _config;

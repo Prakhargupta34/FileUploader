@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using FileUploader.Attributes;
 using FileUploader.Service.Interfaces;
 using FileUploader.Service.Models.RequestModels;
 using FileUploader.Shared.Constants;
@@ -12,6 +13,7 @@ namespace FileUploader.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[ValidateModel]
 public class UserController: ControllerBase
 {
     private readonly IUserService _userService;

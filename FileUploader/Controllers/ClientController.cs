@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using FileUploader.Attributes;
 using FileUploader.Service;
 using FileUploader.Service.Models.RequestModels;
 using Microsoft.AspNetCore.Http;
@@ -8,6 +9,8 @@ using Newtonsoft.Json;
 namespace FileUploader.Controllers;
 
 [Route("api/[controller]")]
+[ApiController]
+[ValidateModel]
 public class ClientController : ControllerBase
 {
     private readonly IClientService _clientService;

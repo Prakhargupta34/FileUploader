@@ -6,11 +6,14 @@ using FileUploader.Service.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq;
+using FileUploader.Attributes;
 using FileUploader.Shared.Constants;
 
 namespace FileUploader.Controllers
 {
     [Route("api/[controller]")]
+    [ApiController]
+    [ValidateModel]
     public class FilesController : ControllerBase
     {
         private readonly IFileService _fileService;
